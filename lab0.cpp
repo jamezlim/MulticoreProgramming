@@ -1,19 +1,5 @@
-#include <iostream>
 #include <vector>
-#include <string>
-
-template <typename K, typename V>
-class multimap {
-public:
-	std::vector<K> keys;
-	std::vector<V> values;	
-	multimap();
-	//~multimap();
-	bool insert (const K& key, const V& value);
-	bool find(const K& key);
-	bool find(const K& key, std::vector<V>& values);
-	int remove(const K& key);
-};
+#include "lab0.h"
 
 //constructor
 template <typename K, typename V>
@@ -59,45 +45,4 @@ int multimap<K,V> :: remove(const K& key){
 		}
 	}
 	return count;
-}
-
-
-
-
-int main (){
-	multimap <std::string,int> a;
-	std:: vector<int> valuesWithSameKey;
-
-	a.insert("first",1);
-	a.insert("second",2);
-	a.insert("third",3);
-	a.insert("fourth",4);
-	a.insert("fourth",5);
-	a.insert("fourth",6);
-	a.insert("fourth",7);
-
-	for (int i = 0; i < a.keys.size(); i ++ ) std:: cout << a.keys[i]<< std:: endl;
-	for (int i = 0; i < a.keys.size(); i ++ ) std:: cout << a.values[i]<< std:: endl;	
-	// std:: cout << a.find("first");
-	//a.find ( "fourth",valuesWithSameKey);
-	// std:: cout << valuesWithSameKey[0];
-	// std:: cout << valuesWithSameKey[1];
-	// std:: cout << valuesWithSameKey[2];
-	// std:: cout << valuesWithSameKey[3];
-	// std:: cout << "size is:" << valuesWithSameKey.size() <<std:: endl;
-
-	// std:: cout << a.remove("fourth") << std::endl;
-	// valuesWithSameKey.erase(valuesWithSameKey.begin());
-	// std:: cout << valuesWithSameKey[0];
-	// std:: cout << valuesWithSameKey[1];
-	// std:: cout << valuesWithSameKey[2];
-	// std:: cout << valuesWithSameKey[3];
-	// std:: cout << valuesWithSameKey[4];
-	// std:: cout << "size is:" << valuesWithSameKey.size() <<std:: endl;
-	std:: cout << "how many were removed?" <<  a.remove("fourth") << std::endl;
-
-	for (int i = 0; i < a.keys.size(); i ++ ) std:: cout << a.keys[i]<< std:: endl;
-	for (int i = 0; i < a.keys.size(); i ++ ) std:: cout << a.values[i]<< std:: endl;
-
-	return 0;
 }
