@@ -4,7 +4,6 @@
 //constructor
 template <typename K, typename V>
 multimap<K,V> :: multimap(){
-	
 }
 
 template <typename K, typename V>
