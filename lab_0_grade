@@ -9,6 +9,4 @@ Lab 0 Rubric
 +20 = uses std:: list or vector, uses templates as required, and programs runs in O(n) time
 +5 = provides makefile / general instructions and readme files and provides good readability in general by using comments 
 
-score = 90
-
--10 = test does not use find(K, V)
+score = 100
