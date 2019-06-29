@@ -1,10 +1,10 @@
 #include <iostream>
 
-
 //constructor 
 template <typename T>
 ThreadSafeListenerQueue <T>:: ThreadSafeListenerQueue(){
 	size = 0;
+	mtx = PTHREAD_MUTEX_INITIALIZER;
 }
 
 template <typename T>
@@ -13,13 +13,6 @@ void ThreadSafeListenerQueue <T> :: print(){
 		std::cout << * itr << " --> " ;
 	}
 }
-
-// template <typename T>
-// int ThreadSafeListenerQueue <T> :: size(){
-// 	return size;
-// }
-
-//??? take care of the case where size is max?? 
 
 template <typename T>
 bool ThreadSafeListenerQueue <T> :: push (const T element){
@@ -46,6 +39,7 @@ bool ThreadSafeListenerQueue <T> :: pop(T& element){
 		return true;
 	}
 	// error 
+	std:: cout << "Fatal Error!! in pop" << std::endl;
 	pthread_mutex_unlock(&mtx);
 	return false; 
 }
@@ -63,6 +57,7 @@ bool ThreadSafeListenerQueue <T> :: listen(T& element){
 		pthread_mutex_unlock(&mtx);
 		return true;
 	}
+	std:: cout << "Fatal Error!! in listen" << std::endl;
 	pthread_mutex_unlock(&mtx);
 	return false;
 }

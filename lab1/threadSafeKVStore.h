@@ -9,7 +9,6 @@ template <typename K, typename V>
 class ThreadSafeKVStore {
 	std:: unordered_map < K, V> map;
 	std:: mutex mtx;
-	// question 
 	typename std:: unordered_map< K, V> :: iterator itr;
 public:
 	ThreadSafeKVStore();
@@ -18,8 +17,8 @@ public:
 	void print();
 	bool lookup(const K key, V& value);
 	bool remove(const K key);
-	typename std:: unordered_map< K, V> :: iterator getBegin() { return itr.begin();}
-
+	typename std:: unordered_map< K, V> :: iterator getBegin() { return map.begin();}
+	typename std:: unordered_map< K, V> :: iterator getEnd() { return map.end();}
 };
 
 #include "ThreadSafeKVStore.cpp"
