@@ -10,7 +10,7 @@ class ThreadSafeListenerQueue {
 	pthread_mutex_t mtx ;
 	pthread_cond_t cv;
 	int size ;
-	typename std:: list <T> :: iterator itr;
+	typedef std:: list <T> :: iterator itr;
 public:
 	ThreadSafeListenerQueue();
 	bool push(const T element);

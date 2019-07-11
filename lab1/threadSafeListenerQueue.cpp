@@ -4,7 +4,8 @@
 template <typename T>
 ThreadSafeListenerQueue <T>:: ThreadSafeListenerQueue(){
 	size = 0;
-	mtx = PTHREAD_MUTEX_INITIALIZER;
+	//mtx = PTHREAD_MUTEX_INITIALIZER;
+	pthread_mutex_init(&mtx, NULL );
 }
 
 template <typename T>
