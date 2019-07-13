@@ -1,3 +1,7 @@
 hw1
 91.6
 -8.4 = Q3 (b) ~ (g) incorrect; -0 = Q5 = for future problems like this I suggest using the format uploaded in the lecture slides
+
+hw2
+87.5
+-7.5 = Q1 the second distinction seems to be just a definition? and it is not true that condition variable always wake up all sleeping threads; -5 = Q6B you cannot get the value of a semaphore directly unless you make your own custom one; try not using too many primitives as it is easy to make a mistake
