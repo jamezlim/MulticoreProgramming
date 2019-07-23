@@ -1,0 +1,28 @@
+main
+- -d => DEGREE 
+- should generate N+1 pair of numbers and push them in to a vector => points 
+- initialize answer = std::pair< std::vector<double> coeff , double sumDis>
+- initialize EPSILON = 1.0 
+- intialize 2 threadSafeListenerQueue objects (q1, q2)
+- generate N+1 random float coefficients and push them onto coeff vector<double> 
+- compute/ call fitness
+- push( answer ) onto q1 x DEGREE 
+
+individual thread 
+- pop( ) from q1 
+- generate new coefficients by adding a new random number which is gradually narrowed.
+- call fitness (  std::vector<double> newCoeff ) 
+- push returned pair std::pair< std::vector<double > coeff , double sumDis>> onto q2
+
+back in main 
+- listen( ) on q2 
+- compare value with ANSWER => update ANSWER if better 
+- push ANSWER coeff onto q1 
+
+REPEAT UNTIL ( ANSWER.sumDis < 0.1 ) 
+
+
+other functions 
+- declare and implement function fitness ( std::vector<double> coeff ) that returns a std::pair< std::vector<double> coeff , double sumDis> >
+   where sumDis is the double value of the sum of the N+1 computed distances 
+-  declare and implement function threadFunction ( &q1, &q2, points, degree) that returns void and does individual thread tasks

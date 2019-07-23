@@ -4,7 +4,6 @@
 #include <list>
 #include <condition_variable>
 #include <mutex>
-//#include <pthread.h> 
 
 template <typename T>
 class ThreadSafeListenerQueue {
@@ -19,7 +18,7 @@ public:
 	bool pop(T& element);
 	bool listen(T& element);
 	void print ();
-	int get_size() { return size; }
+	int length() { return size; }
 };
 
 #include "threadSafeListenerQueue.cpp"

@@ -9,7 +9,7 @@ template <typename K, typename V>
 class ThreadSafeKVStore {
 	std:: unordered_map < K, V> map;
 	std:: mutex mtx;
-	typedef std:: unordered_map< K, V> :: iterator itr;
+	typename std:: unordered_map< K, V> :: iterator itr;
 public:
 	ThreadSafeKVStore();
 	bool insert(const K key, const V value);
