@@ -55,3 +55,11 @@ bool ThreadSafeListenerQueue <T> :: listen(T& element){
 	std:: cout << "Fatal Error!! in listen" << std::endl;
 	return false;
 }
+
+template <typename T>
+bool ThreadSafeListenerQueue <T> :: clear(){
+	std::unique_lock<std::mutex> lck(mtx);
+	queue.clear();
+	size = 0;
+	return true;
+}

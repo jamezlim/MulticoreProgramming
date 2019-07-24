@@ -19,6 +19,7 @@ public:
 	bool listen(T& element);
 	void print ();
 	int length() { return size; }
+	bool clear();
 };
 
 #include "threadSafeListenerQueue.cpp"

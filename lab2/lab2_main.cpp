@@ -1,3 +1,4 @@
+    
 #include <string> 
 #include <utility> // pair
 #include <iostream>
@@ -10,8 +11,9 @@
 #include <cmath> // absolute value 
 #include "threadSafeListenerQueue.h"
 
-
+// variables for resetting coefficients when stuck
 int iterationCount = 0; 
+int TOLERANCE = 600000;
 
 // function to compute fitness 
 std::pair < std::vector <double>, double> fitness (std::vector < std::pair < double, double > > points , std::vector <double> coeff , int DEGREE){
@@ -49,7 +51,7 @@ void threadFunction(ThreadSafeListenerQueue < std::pair < std::vector <double>, 
    	std::default_random_engine re(time(0));
 
 	while ( q1.listen(element)){
-		iterationCount ++;
+		if ( iterationCount > TOLERANCE + 5 + q1.length() ) iterationCount = 0;
 		double range = 1.0;
 		if( element.second == -1.0) break;
 		
@@ -57,13 +59,14 @@ void threadFunction(ThreadSafeListenerQueue < std::pair < std::vector <double>, 
 		// set random range for each distance offset 
 		if ( element.second < 500) range = 0.8;
 		if ( element.second < 100) range = 0.6;
+		if ( element.second < 80) range = 0.3;
 		if ( element.second < 50) range = 0.1;
-		if ( element.second < 10) range = 0.06;
-		if ( element.second < 5) range = 0.04;
-		if ( element.second < 2) range = 0.01;
-		if ( iterationCount > 400000) {
-			range = 0.08;
-			iterationCount = 0;
+		if ( element.second < 10) range = 0.08;
+		if ( element.second < 5) range = 0.05;
+		if ( element.second < 2) range = 0.02;
+		// if for some iteration the fitness has not been updated generate bigger mutations to break out
+		if ( iterationCount > TOLERANCE) {
+			range = 0.8;
 		}	
 		// generate new DEGREE+1 double coefficients and push to a vector 
 		// std::vector coeff will contain at coeff[0] the least significant coefficient
@@ -86,6 +89,7 @@ void threadFunction(ThreadSafeListenerQueue < std::pair < std::vector <double>, 
 		q2.push(fitness(points, coeff, DEGREE));
 
 		//std:: cout << "end of thread#" << iterationCount ++ << std::endl;
+		iterationCount ++;
 	}
 	
 }
@@ -175,10 +179,15 @@ int main (int argc,char ** argv){
 		if ( element.second < answer.second){
 			answer = element;
 			iterationCount = 0;
-			std:: cout  << "current fitness: " << answer.second << std::endl;
+			std:: cout  << answer.second << std::endl;
 		}
 
-		q1.push(answer);
+		// if it is stuck at some fitness push modified coefficients into q1 and start mutaiton from there
+		if ( iterationCount >= TOLERANCE && iterationCount < TOLERANCE + 5+ NUM_OF_THREADS ) {
+			q1.push( element);
+			answer = element;
+		}	
+		else q1.push(answer);
 
 	}
 
@@ -213,4 +222,3 @@ int main (int argc,char ** argv){
 
 	return 0;
 }
-
