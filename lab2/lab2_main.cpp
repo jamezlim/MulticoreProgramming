@@ -11,7 +11,7 @@
 #include "threadSafeListenerQueue.h"
 
 
-int threadCount = 0; 
+int iterationCount = 0; 
 
 // function to compute fitness 
 std::pair < std::vector <double>, double> fitness (std::vector < std::pair < double, double > > points , std::vector <double> coeff , int DEGREE){
@@ -31,7 +31,7 @@ std::pair < std::vector <double>, double> fitness (std::vector < std::pair < dou
 		//std:: cout << "points[i].second: " << points[i].second << std::endl;
 
 		// sum total distance btwn given point y and f(x)
-		distance += abs(fx - points[i].second);
+		distance += fabs(fx - points[i].second);
 	}
 
 	//std:: cout << "distance: " << distance << std::endl;
@@ -49,9 +49,8 @@ void threadFunction(ThreadSafeListenerQueue < std::pair < std::vector <double>, 
    	std::default_random_engine re(time(0));
 
 	while ( q1.listen(element)){
-
+		iterationCount ++;
 		double range = 1.0;
-		//std:: cout << "start of thread#" << threadCount << std::endl;
 		if( element.second == -1.0) break;
 		
 
@@ -61,6 +60,11 @@ void threadFunction(ThreadSafeListenerQueue < std::pair < std::vector <double>, 
 		if ( element.second < 50) range = 0.1;
 		if ( element.second < 10) range = 0.06;
 		if ( element.second < 5) range = 0.04;
+		if ( element.second < 2) range = 0.01;
+		if ( iterationCount > 400000) {
+			range = 0.08;
+			iterationCount = 0;
+		}	
 		// generate new DEGREE+1 double coefficients and push to a vector 
 		// std::vector coeff will contain at coeff[0] the least significant coefficient
 		// ex) ax^2 + bx + c == > coeff = {c , b , a}
@@ -78,10 +82,10 @@ void threadFunction(ThreadSafeListenerQueue < std::pair < std::vector <double>, 
 		// }	
 
 
-		coeff.push_back(element.first[DEGREE]);
+		
 		q2.push(fitness(points, coeff, DEGREE));
 
-		//std:: cout << "end of thread#" << threadCount ++ << std::endl;
+		//std:: cout << "end of thread#" << iterationCount ++ << std::endl;
 	}
 	
 }
@@ -93,7 +97,7 @@ int main (int argc,char ** argv){
 	int NUM_OF_THREADS = 0;
 	int DEGREE = 0; 
 	double EPSILON = 1.0;
-	double dRate = 0.95;
+
 
 	// random DEGREE + 1 (x,y) coordinates 
 	std::vector < std::pair < double, double > > points;
@@ -138,14 +142,11 @@ int main (int argc,char ** argv){
 	// std::vector coeff will contain at coeff[0] the least significant coefficient
 	// ex) ax^2 + bx + c == > coeff = {c , b , a}
 	std::vector < double > coeff;
-	std::uniform_real_distribution<double> uni(-50,50);
+	std::uniform_real_distribution<double> uni(-20,20);
 	for (int i = 0 ; i < DEGREE+1 ; i ++){
 		double randCoeff = uni(re) ;
 		coeff.push_back( randCoeff); 
 	}
-
-	// the last double of vector coeff will be the dRate
-	coeff.push_back(dRate);
 
 	// constantly compare results of threads with answer 
 	answer = fitness(points,coeff, DEGREE);
@@ -173,8 +174,8 @@ int main (int argc,char ** argv){
 		
 		if ( element.second < answer.second){
 			answer = element;
-			answer.first[DEGREE] *= dRate;
-			std:: cout  <<  answer.second << std::endl;
+			iterationCount = 0;
+			std:: cout  << "current fitness: " << answer.second << std::endl;
 		}
 
 		q1.push(answer);
