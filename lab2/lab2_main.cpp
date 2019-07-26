@@ -24,7 +24,7 @@ std::pair < std::vector <double>, double> fitness (std::vector < std::pair < dou
 		
 		// inner loop for # of coefficients 
 		double fx = 0.0;
-		int power = 1;
+		double power = 1.0;
 		for ( int j = 0 ; j < DEGREE+1; j ++){
 			 fx += coeff[j] * power;
 			 power *= points[i].first; 
@@ -52,21 +52,18 @@ void threadFunction(ThreadSafeListenerQueue < std::pair < std::vector <double>, 
 
 	while ( q1.listen(element)){
 		if ( iterationCount > TOLERANCE + 5 + q1.length() ) iterationCount = 0;
-		double range = 1.0;
+		double range; 
 		if( element.second == -1.0) break;
 		
 
 		// set random range for each distance offset 
-		if ( element.second < 500) range = 0.8;
-		if ( element.second < 100) range = 0.6;
-		if ( element.second < 80) range = 0.3;
-		if ( element.second < 50) range = 0.1;
-		if ( element.second < 10) range = 0.08;
-		if ( element.second < 5) range = 0.05;
-		if ( element.second < 2) range = 0.02;
+		
+		if ( element.second > 500 ) range = 0.8;
+		else range = element.second * 0.005;
 		// if for some iteration the fitness has not been updated generate bigger mutations to break out
 		if ( iterationCount > TOLERANCE) {
-			range = 0.8;
+			std::cout << "reached" << std::endl;
+			range = 0.5;
 		}	
 		// generate new DEGREE+1 double coefficients and push to a vector 
 		// std::vector coeff will contain at coeff[0] the least significant coefficient
