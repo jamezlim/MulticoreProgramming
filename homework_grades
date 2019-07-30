@@ -5,3 +5,7 @@ hw1
 hw2
 87.5
 -7.5 = Q1 the second distinction seems to be just a definition? and it is not true that condition variable always wake up all sleeping threads; -5 = Q6B you cannot get the value of a semaphore directly unless you make your own custom one; try not using too many primitives as it is easy to make a mistake
+
+hw3
+90
+-4 = Q1(c) incorrect; -6 = Q3 missing the bug that two different mutices are used for the same critical section in the two functions- one solution is to use a same mutex;
