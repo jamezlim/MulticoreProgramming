@@ -112,6 +112,8 @@ int main (int argc,char ** argv){
 	ThreadSafeListenerQueue < int32_t > q;
 	std:: thread threadArray[NUM_OF_THREADS];
 
+	
+
 	// time stamps for total execution time 
 	auto firstExecutionTime = std::chrono::steady_clock::now();
 	auto lastTerminationTime = std::chrono::steady_clock::now();

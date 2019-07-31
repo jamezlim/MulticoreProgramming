@@ -7,13 +7,15 @@
 #include <thread>
 #include <vector>
 #include <random>
+#include <chrono> // execution time
 #include <iomanip> // double precision
 #include <cmath> // absolute value 
+#include <iterator> // iteraotr prev next
 #include "threadSafeListenerQueue.h"
 
 // variables for resetting coefficients when stuck
 int iterationCount = 0; 
-int TOLERANCE = 600000;
+int TOLERANCE = 10000000;
 
 // function to compute fitness 
 std::pair < std::vector <double>, double> fitness (std::vector < std::pair < double, double > > points , std::vector <double> coeff , int DEGREE){
@@ -45,26 +47,31 @@ std::pair < std::vector <double>, double> fitness (std::vector < std::pair < dou
 
 // function for each thread 
 void threadFunction(ThreadSafeListenerQueue < std::pair < std::vector <double>, double> > & q1, 
-					ThreadSafeListenerQueue < std::pair < std::vector <double>, double> > & q2, 
+					ThreadSafeListenerQueue < std::pair < std::vector <double>, double> > & q2,
+					ThreadSafeListenerQueue<double> & threadSafeTimeQueue, 
 					std::vector < std::pair < double, double > > points, int DEGREE){
+	
 	std::pair < std::vector <double>, double> element;
 	std::uniform_real_distribution<double> unif(-100  ,100);
    	std::default_random_engine re(time(0));
 
 	while ( q1.listen(element)){
+		auto start = std:: chrono::steady_clock :: now();
+		if( element.second == -1.0) break;
 		if ( iterationCount > TOLERANCE + 5 + q1.length() ) iterationCount = 0;
 		double range; 
-		if( element.second == -1.0) break;
+		
 		
 
 		// set random range for each distance offset 
-		
+		//range =  element.second * 0.0005;
 		if ( element.second > 500 ) range = 0.8;
-		else range = element.second * 0.005;
+		if ( element.second > 100 ) range = 0.0005;
+		else range = element.second * 0.0002;
 		// if for some iteration the fitness has not been updated generate bigger mutations to break out
 		if ( iterationCount > TOLERANCE) {
-			std::cout << "reached" << std::endl;
-			range = 0.5;
+			//std::cout << "reached" << std::endl;
+			range = 0.8;
 		}	
 		// generate new DEGREE+1 double coefficients and push to a vector 
 		// std::vector coeff will contain at coeff[0] the least significant coefficient
@@ -76,18 +83,21 @@ void threadFunction(ThreadSafeListenerQueue < std::pair < std::vector <double>, 
 			coeff.push_back( randCoeff); 
 		}
 
-		// for (int i = 0 ; i < DEGREE+1 ; i ++){
-
-		// 	double randCoeff = element.first[i] + dRate * unif(re);
-		// 	coeff.push_back( randCoeff); 
-		// }	
-
 
 		
 		q2.push(fitness(points, coeff, DEGREE));
 
 		//std:: cout << "end of thread#" << iterationCount ++ << std::endl;
 		iterationCount ++;
+		//std::this_thread::sleep_for (std::chrono::milliseconds(2432));
+		auto end = std:: chrono::steady_clock :: now();
+		//double exTime = (double) std::chrono::duration_cast < std::chrono:: milliseconds> (end - start).count()/1000.0;
+		
+
+		//auto exTime = std::chrono::duration_cast < std::chrono:: microseconds> (end - start).count();
+		double exTime = (double) std::chrono::duration_cast < std::chrono:: microseconds> (end - start).count();
+		threadSafeTimeQueue.push(exTime);
+		//std:: cout << " - > Execution time: " << exTime  << std::endl;
 	}
 	
 }
@@ -125,20 +135,31 @@ int main (int argc,char ** argv){
 	std:: cout << "Finding best fit for degree "<< DEGREE << " polynomial..." << std::endl;
 	std:: cout << "------------------------------------------"<< std::endl;
 
-	// generate random DEGREE+1 points in range (-100, 100)
+	// generate random DEGREE+1 points in range (-5, 5)
 	// push coordinates onto points vector
 
 	std::uniform_real_distribution<double> unif(-5.0,5.0);
-   	std::default_random_engine re(time(0));
+  	std::default_random_engine re(time(0));
 	for (int i = 0 ; i < DEGREE + 1; i ++ ){
 		double x = unif(re);
 		double y = unif(re);
 		points.push_back( std::make_pair(x,y));
 	}
 
+
+	//fix a point for testing
+	//points = {{-3.2317,-1.1965 }, {-1.875 ,4.4629 },{ -1.1634,-0.51425 } };
+	//points = {{ 2.3669,2.4816 }, { 1.7451,-1.1468 }, { 3.6583,-0.24945 }, { -1.6479,1.7633 }};
+	//points = {{2.3669,2.4816}, {1.7451,-1.1468}, {3.6583,-0.24945}, {-1.6479,1.7633},{3.8125,3.8607}};
+	//points = {{ -2.9664,-4.3602 }, { 1.3492,-4.3841 }, { 3.7887,2.7499 }, {0.21845,4.8722 }, {-1.9638,2.5002 }};
+	
+
 	// initialize queues
 	ThreadSafeListenerQueue < std::pair < std::vector <double>, double> > q1;
 	ThreadSafeListenerQueue < std::pair < std::vector <double>, double> > q2;
+
+	//vector for keeping execution time of threads 
+	ThreadSafeListenerQueue <double> threadSafeTimeQueue;
 
 	// generate DEGREE+1 double coefficients and push to a vector 
 	// std::vector coeff will contain at coeff[0] the least significant coefficient
@@ -162,8 +183,12 @@ int main (int argc,char ** argv){
 
 	// start threads 
 	for (int i=0; i < NUM_OF_THREADS ; i ++ ){
-		threadArray[i] = std::thread (threadFunction, std::ref(q1), std::ref(q2),points,DEGREE);
+		threadArray[i] = std::thread (threadFunction, std::ref(q1), std::ref(q2), std::ref(threadSafeTimeQueue),points,DEGREE);
 	}
+
+	// counter for counting number of coefficients guessed 
+	int totalGuesses = 0;
+	int totalBestCoeffs = 0;
 
 	// repeat while distance is greater than EPSILON 
 	while ( answer.second > EPSILON ){
@@ -173,10 +198,12 @@ int main (int argc,char ** argv){
 		// q1 continas tasks waiting 
 		// q2 contains results from completed threads 
 		q2.listen(element);
+		totalGuesses ++; 
 		
 		if ( element.second < answer.second){
 			answer = element;
 			iterationCount = 0;
+			totalBestCoeffs ++;
 			std:: cout  << answer.second << std::endl;
 		}
 
@@ -200,6 +227,33 @@ int main (int argc,char ** argv){
 		threadArray[i].join();
 	}
 
+	// sort threadSafeTimeQueue for mean, median, max, min 
+	
+	threadSafeTimeQueue.sort();
+	
+	//find mean and median 
+	int size = threadSafeTimeQueue.length();
+	double mean;
+	double median;
+	if ( size != 0){
+		int i = 0;
+		int target = size/2 ;
+		double sum = 0.0;
+		for ( auto itr = threadSafeTimeQueue.begin(); itr != threadSafeTimeQueue.end() ; ++ itr){
+			sum += *itr;
+			if ( i == target){
+				if ( size%2 !=0 ) median = *itr;
+				else median = ((*itr) + *(std:: prev ( itr, 1)))/2.0; 
+			}
+			i ++;
+			//std::cout << *itr << std::endl;
+
+		}
+		mean = sum / (double) size;
+	}
+	
+
+
 	std::cout << "\nBest fit coefficients for points \n";
 	for (int i = 0; i < DEGREE+1 ; i ++){
 		if ( i == DEGREE) std::cout << std::setprecision (5) << "( " << points[i].first << "," << points[i].second << " ) are" << std::endl;
@@ -211,12 +265,26 @@ int main (int argc,char ** argv){
 	for (int i = DEGREE; i >= 0; i --){
 		std::cout <<std::setprecision (14) << answer.first[i] << " ";
 	}
-	std::cout << "\n" ;
+	std::cout << "\n" << std:: endl;
+
+
+	std::cout << "STATS" << std:: endl;
+	std:: cout << "------------------------------------------" << std::endl;
+ 	std::cout << "Total number of coefficients guessed: " << totalGuesses +1 << std::endl;
+	std::cout << "Total number of best coefficients: " << totalBestCoeffs << std:: endl;
+	std::cout << "Minimum: " << threadSafeTimeQueue.front() << " µs" << std:: endl;
+	std::cout << "Maximum: " << threadSafeTimeQueue.back() << " µs" <<std:: endl;
+	std::cout << std::setprecision( 7) << "Mean: " << mean << " µs" <<std:: endl;
+	std::cout << std::setprecision( 7) << "Median: " << median << " µs" <<std:: endl;
+
+
 
 
 	// program termination
 	std:: cout << "------------------------------------------" << std::endl;
-	std:: cout << "Terminating Program..." << std::endl;
+	std:: cout << "\nTerminating Program..." << std::endl;
 
 	return 0;
 }
+
+
