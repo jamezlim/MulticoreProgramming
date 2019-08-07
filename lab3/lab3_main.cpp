@@ -66,7 +66,7 @@ void threadFunction(ThreadSafeListenerQueue < std::pair < std::vector <double>, 
 		// set random range for each distance offset 
 		//range =  element.second * 0.0005;
 		if ( element.second > 500 ) range = 0.8;
-		if ( element.second > 100 ) range = 0.0005;
+		if ( element.second > 100 ) range = element.second * 0.0005;
 		else range = element.second * 0.0002;
 		// if for some iteration the fitness has not been updated generate bigger mutations to break out
 		if ( iterationCount > TOLERANCE) {
