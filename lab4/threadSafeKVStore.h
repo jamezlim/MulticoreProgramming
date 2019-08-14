@@ -16,10 +16,10 @@ class ThreadSafeKVStore {
 public:
 	ThreadSafeKVStore();
 	bool insert(const K key, const V value);
-	void print();
 	bool lookup(const K key, V& value);
 	bool remove(const K key);
 	bool truncate( const int n);
+	size_t size();
 	std::pair<K,V> operator[] (const int n);
 	typename std:: multimap< K, V> :: iterator begin() { return map.begin();}
 	typename std:: multimap< K, V> :: iterator end() { return map.end();}

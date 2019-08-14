@@ -1,10 +1,6 @@
-INC = 
-LIB = 
-CFLAGS += -std=c++11 -Wall
-CC = g++
+CC		= g++ 
+CFLAGS	= -O
 
-maze-demo: maze-demo.cc maze.o
-	$(CC) $(INC) $(LIB) maze-demo.cc maze.o $(CFLAGS) -o $@
 
-maze.o: maze.cc
-	$(CC) $(INC) -c maze.cc $(CFLAGS)
+lab4: lab4_main.cpp
+	$(CC) $(CFLAGS) -o lab4 lab4_main.cpp -lpthread

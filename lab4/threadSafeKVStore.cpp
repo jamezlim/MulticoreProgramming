@@ -5,11 +5,12 @@ template <typename K, typename V>
 ThreadSafeKVStore<K,V> :: ThreadSafeKVStore(){
 }
 
-//print function 
 template <typename K, typename V>
-void ThreadSafeKVStore<K,V> :: print(){
-	for ( itr = map.begin(); itr != map.end();itr ++)
-		std::cout << "[" << itr -> first << "->" << itr -> second << "] ";
+size_t ThreadSafeKVStore<K,V> :: size(){
+	pthread_rwlock_wrlock( &rwlock);
+	size_t temp = map.size();
+	pthread_rwlock_unlock( &rwlock);
+	return temp;
 }
 
 template <typename K, typename V>
